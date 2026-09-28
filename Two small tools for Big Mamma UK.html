@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Two small tools for Big Mamma UK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Karla:wght@400;500;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FCEDE8; --card:#FFF8F5; --ink:#2B1A2E; --soft:#6E5A6B;
+  --pomodoro:#D2311F; --basilico:#2E6B45; --oro:#E9A92A; --rosa:#F3B7C3;
+  --line:#EBCFC7; --receipt:#FFFDF8; --receipt-ink:#2B1A2E;
+  --good:#2E6B45; --mid:#B97A0B; --bad:#C0291A;
+  --display:"Shrikhand", Georgia, "Times New Roman", serif;
+  --body:"Karla", "Helvetica Neue", Arial, sans-serif;
+  --mono:"Courier Prime", "Courier New", Courier, monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1D1320; --card:#281B2B; --ink:#F7E6E1; --soft:#C9B3BF;
+    --pomodoro:#FF6B57; --basilico:#78C894; --oro:#F2BE55; --rosa:#7A3F52;
+    --line:#43304A; --good:#78C894; --mid:#F2BE55; --bad:#FF6B57;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1D1320; --card:#281B2B; --ink:#F7E6E1; --soft:#C9B3BF;
+  --pomodoro:#FF6B57; --basilico:#78C894; --oro:#F2BE55; --rosa:#7A3F52;
+  --line:#43304A; --good:#78C894; --mid:#F2BE55; --bad:#FF6B57;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+:focus-visible{outline:3px solid var(--oro);outline-offset:3px;border-radius:4px}
+
+/* top ribbon */
+.ribbon{background:var(--pomodoro);color:#FFF4EF;font-size:14px;padding:9px 0}
+.ribbon .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ribbon a{text-decoration:underline;text-underline-offset:3px}
+
+/* hero */
+.hero{padding:56px 0 30px}
+.hero h1{font-family:var(--display);font-weight:400;color:var(--pomodoro);font-size:clamp(46px,8.5vw,108px);line-height:.95;margin:0 0 18px;letter-spacing:-.5px;text-shadow:4px 4px 0 var(--rosa)}
+.hero p.lede{max-width:620px;font-size:19px;margin:0 0 26px}
+.presets{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.presets span{font-weight:700;margin-right:4px}
+.chip{font:inherit;font-size:15px;font-weight:700;border:2px solid var(--ink);background:transparent;color:var(--ink);padding:8px 16px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.chip:hover{background:var(--rosa)}
+.chip[aria-pressed="true"]:hover{background:var(--ink)}
+
+/* read me */
+.readme{border:2px dashed var(--ink);border-radius:18px;padding:18px 22px;max-width:760px;margin:0 0 30px;background:var(--card)}
+.readme p{margin:0 0 10px;font-weight:700}
+.readme ul{margin:0;padding-left:18px;font-size:15px;color:var(--soft)}
+.readme li{margin-bottom:4px}
+/* tabs */
+.tabs{display:flex;gap:0;border-bottom:3px solid var(--ink);margin-bottom:30px;flex-wrap:wrap}
+.tab{font:inherit;font-family:var(--display);font-size:clamp(20px,3vw,28px);background:transparent;color:var(--soft);border:3px solid transparent;border-bottom:0;border-radius:18px 18px 0 0;padding:12px 24px 10px;cursor:pointer;margin-bottom:-3px}
+.tab[aria-selected="true"]{color:var(--pomodoro);background:var(--paper);border-color:var(--ink)}
+.tab .n{font-family:var(--body);font-weight:800;font-size:15px;display:block;color:var(--soft)}
+[role=tabpanel][hidden]{display:none}
+.part-title{font-family:var(--display);font-weight:400;font-size:clamp(28px,4.5vw,42px);margin:0 0 18px;line-height:1.05}
+.presets{margin-bottom:26px}
+/* main grid */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:34px;align-items:start;padding-bottom:40px}
+@media (max-width:920px){.grid{grid-template-columns:1fr}}
+
+.menu{background:var(--card);border:2px solid var(--ink);border-radius:22px;padding:26px 28px 10px;box-shadow:8px 8px 0 var(--basilico)}
+.course{border:0;margin:0 0 22px;padding:0}
+.course legend{font-family:var(--display);font-size:24px;color:var(--basilico);padding:0;margin-bottom:2px}
+.course .sub{margin:0 0 14px;color:var(--soft);font-size:15px}
+.field{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.field:last-child{border-bottom:0}
+.field label{font-weight:700;font-size:16px}
+.field output{font-weight:800;font-variant-numeric:tabular-nums;color:var(--pomodoro)}
+.field small{grid-column:1/-1;color:var(--soft);font-size:14px;line-height:1.4}
+.field input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--pomodoro);height:26px;margin:4px 0 0}
+
+/* receipt */
+.receipt-wrap{position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}
+@media (max-width:920px){.receipt-wrap{position:static}}
+.receipt{background:var(--receipt);color:var(--receipt-ink);font-family:var(--mono);font-size:15px;padding:26px 24px 30px;position:relative;box-shadow:0 14px 30px rgba(43,26,46,.18);transform:rotate(-.6deg)}
+.receipt::after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:12px;background:linear-gradient(-45deg,transparent 8px,var(--receipt) 0) 0 0/16px 12px repeat-x,linear-gradient(45deg,transparent 8px,var(--receipt) 0) 0 0/16px 12px repeat-x}
+.receipt h2{font-family:var(--display);font-weight:400;font-size:30px;text-align:center;margin:0;color:#D2311F}
+.receipt .addr{text-align:center;font-size:13px;margin:4px 0 14px}
+.rule{border:0;border-top:2px dashed #2B1A2E;margin:12px 0}
+.row{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+.row b{font-variant-numeric:tabular-nums}
+.row.big{font-size:19px;font-weight:700;padding:6px 0}
+.verdict{margin-top:14px;text-align:center;font-family:var(--display);font-size:26px;line-height:1.1}
+.verdict small{display:block;font-family:var(--mono);font-size:13px;margin-top:6px}
+.warn{font-size:13px;background:#FFE7A8;padding:6px 8px;margin-top:10px;display:none}
+.thanks{text-align:center;font-size:13px;margin-top:16px}
+
+/* sections */
+section.block{padding:34px 0}
+section.block h2{font-family:var(--display);font-weight:400;font-size:clamp(32px,5vw,48px);color:var(--ink);margin:0 0 6px;line-height:1.05}
+section.block .intro{max-width:640px;margin:0 0 22px;color:var(--soft)}
+.panel{background:var(--card);border:2px solid var(--ink);border-radius:22px;padding:22px}
+.chart{width:100%;height:auto;display:block}
+.chart text{font-family:var(--body);fill:var(--soft);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:14px;margin-top:10px;color:var(--soft)}
+.legend i{display:inline-block;width:14px;height:4px;vertical-align:middle;margin-right:6px;border-radius:2px}
+
+/* sensitivity */
+.scroll{overflow-x:auto}
+table.sens{border-collapse:separate;border-spacing:6px;min-width:520px;width:100%}
+table.sens th{font-size:14px;font-weight:700;text-align:center;padding:6px;color:var(--soft)}
+table.sens th[scope=row]{text-align:left}
+table.sens td{text-align:center;font-weight:800;font-variant-numeric:tabular-nums;padding:14px 8px;border-radius:12px;font-size:17px}
+td.g{background:color-mix(in srgb,var(--good) 20%,transparent);color:var(--good)}
+td.m{background:color-mix(in srgb,var(--mid) 22%,transparent);color:var(--mid)}
+td.b{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+td.base{outline:3px solid var(--ink);outline-offset:-3px}
+
+/* 100 days */
+.tracker{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px}
+@media (max-width:860px){.tracker{grid-template-columns:1fr}}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.kpi{border:2px solid var(--line);border-radius:14px;padding:12px}
+.kpi b{display:block;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.kpi span{font-size:14px;color:var(--soft)}
+.kpi em{font-style:normal;font-size:13px;font-weight:700}
+.flags{margin:0;padding-left:18px}
+.flags li{margin-bottom:10px}
+.fake{display:inline-block;background:var(--oro);color:#2B1A2E;font-weight:800;font-size:13px;padding:3px 10px;border-radius:999px;margin-bottom:12px}
+
+/* tool 2 */
+.cap{display:block;font-size:14px;color:var(--soft);margin:0 0 8px}
+.wk{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:26px}
+@media (max-width:900px){.wk{grid-template-columns:1fr}}
+.wk-detail h3,.top h3{font-family:var(--display);font-weight:400;font-size:26px;margin:0 0 12px;color:var(--basilico);line-height:1.1}
+.bar{cursor:pointer}
+.bar rect{fill:var(--basilico);transition:fill .15s}
+.bar:hover rect{fill:color-mix(in srgb,var(--basilico) 70%,var(--oro))}
+.bar[aria-pressed="true"] rect{fill:var(--oro)}
+.bar:focus{outline:none}
+.bar:focus-visible rect{stroke:var(--ink);stroke-width:3}
+table.days{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:15px;min-width:320px}
+table.days th{font-size:13px;color:var(--soft);text-align:right;padding:6px 6px;font-weight:700}
+table.days th:first-child,table.days td:first-child{text-align:left}
+table.days td{padding:7px 6px;border-top:1px dashed var(--line);text-align:right}
+table.days tr.best td{font-weight:800;color:var(--basilico)}
+table.days tr.closed td{color:var(--soft)}
+.tops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin:26px 0 10px}
+@media (max-width:900px){.tops{grid-template-columns:1fr}}
+.top{background:var(--card);border:2px solid var(--ink);border-radius:22px;padding:22px}
+ol.rank{list-style:none;margin:0 0 20px;padding:0}
+ol.rank li{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+ol.rank li:last-child{border-bottom:0}
+ol.rank .pos{font-family:var(--display);font-size:22px;color:var(--pomodoro);width:22px}
+ol.rank .lbl{flex:1}
+ol.rank .val{font-weight:800;font-variant-numeric:tabular-nums}
+.hb{display:grid;grid-template-columns:44px 1fr 64px;align-items:center;gap:8px;font-size:14px;margin:5px 0}
+.hb.wide{grid-template-columns:104px 1fr 44px}
+.hb .track{background:color-mix(in srgb,var(--basilico) 12%,transparent);border-radius:999px;height:12px;overflow:hidden}
+.hb .fill{height:100%;background:var(--basilico);border-radius:999px}
+.hb.top1 .fill{background:var(--pomodoro)}
+.hb b{text-align:right;font-variant-numeric:tabular-nums}
+/* notes */
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+@media (max-width:760px){.notes{grid-template-columns:1fr}}
+.notes h3{font-family:var(--display);font-weight:400;font-size:26px;margin:0 0 8px;color:var(--basilico)}
+.notes p,.notes li{font-size:16px}
+.notes ul{padding-left:18px;margin:0}
+.who{background:var(--basilico);color:#FFF4EF;border-radius:22px;padding:28px}
+.who h3{color:#FFF4EF}
+.who a{font-weight:700}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{display:inline-block;background:#FFF4EF;color:#2E6B45;text-decoration:none;font-weight:800;padding:10px 18px;border-radius:999px}
+footer{padding:26px 0 40px;font-size:14px;color:var(--soft)}
+@media (prefers-reduced-motion:no-preference){
+  .receipt{transition:transform .25s}
+  .receipt.bump{transform:rotate(.4deg) translateY(-3px)}
+}
+</style>
+</head>
+<body>
+
+<div class="ribbon"><div class="wrap">
+  <span>A small, unofficial tool made for Big Mamma UK by Gabriel Chauvin</span>
+  <a href="#who">Who made this</a>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <h1>Two small tools<br>for Big Mamma UK</h1>
+  <div class="tabs" role="tablist" aria-label="Tools">
+    <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="true"><span class="n">Tool 1</span>Before opening</button>
+    <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1"><span class="n">Tool 2</span>After opening</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+ <div role="tabpanel" id="p1" aria-labelledby="t1">
+  <h2 class="part-title">Is this new site worth opening?</h2>
+  <div class="readme">
+    <p>A quick business case for a new site: move the sliders, read the bill. It is a 5 minute demo to show the kind of tools I can build, not a real analysis. Almost every number is made up, except these few found online:</p>
+    <ul>
+      <li>UK sales of £56.2m in 2025, up 27%, gross margin 75% (Companies House, via Restaurant Online)</li>
+      <li>Average spend of roughly £27 to £60 across the estate (Victor Lugger, MCA conference, 2023)</li>
+      <li>Edmondo: 200 covers and three private dining rooms near Bank, opening 6 November 2026</li>
+    </ul>
+  </div>
+
+  <div class="presets" role="group" aria-label="Start from a profile">
+    <span>Start from:</span>
+    <button class="chip" data-preset="flagship" aria-pressed="true">City flagship, 200 covers</button>
+    <button class="chip" data-preset="regional" aria-pressed="false">Regional city trattoria</button>
+    <button class="chip" data-preset="neighbourhood" aria-pressed="false">London neighbourhood spot</button>
+  </div>
+  <div class="grid">
+    <form class="menu" id="menu" onsubmit="return false" aria-label="Site assumptions"></form>
+
+    <aside class="receipt-wrap" aria-live="polite">
+      <div class="receipt" id="receipt">
+        <h2>Il Conto</h2>
+        <div class="addr" id="rName">City flagship, 200 covers</div>
+        <hr class="rule">
+        <div class="row"><span>Covers per year</span><b id="rCovers"></b></div>
+        <div class="row"><span>Sales at cruise speed</span><b id="rSales"></b></div>
+        <div class="row"><span>Food and drink</span><b id="rCogs"></b></div>
+        <div class="row"><span>Team</span><b id="rLab"></b></div>
+        <div class="row"><span>Rent and rates</span><b id="rRent"></b></div>
+        <div class="row"><span>Everything else</span><b id="rOther"></b></div>
+        <hr class="rule">
+        <div class="row big"><span>Site profit / yr</span><b id="rEbitda"></b></div>
+        <div class="row"><span>Site margin</span><b id="rMargin"></b></div>
+        <div class="row"><span>Break-even covers/day</span><b id="rBe"></b></div>
+        <div class="row"><span>Cash in before opening</span><b id="rInv"></b></div>
+        <div class="row"><span>Lowest cash point</span><b id="rLow"></b></div>
+        <hr class="rule">
+        <div class="row big"><span>Payback</span><b id="rPay"></b></div>
+        <div class="verdict" id="rVerdict"></div>
+        <div class="warn" id="rWarn"></div>
+        <div class="thanks">Grazie e arrivederci<br>* before central costs and tax</div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="block" aria-labelledby="h-cash">
+    <h2 id="h-cash">Where the cash goes</h2>
+    <div class="panel">
+      <svg class="chart" id="cashChart" viewBox="0 0 900 320" role="img" aria-label="Cumulative cash over 60 months"></svg>
+      <div class="legend">
+        <span><i style="background:var(--pomodoro)"></i>Cumulative cash</span>
+        <span><i style="background:var(--soft)"></i>Break even line</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="h-sens">
+    <h2 id="h-sens">E se...? Payback in months</h2>
+    <div class="panel scroll"><table class="sens" id="sens"></table></div>
+  </section>
+
+ </div>
+
+<div role="tabpanel" id="p2" aria-labelledby="t2" hidden>
+  <h2 class="part-title">How is a new site doing, week by week?</h2>
+  <div class="readme">
+    <p>A weekly dashboard to follow a restaurant once it is open: covers, spend, team cost, profit and private rooms. Click a week in the chart to see its numbers day by day.</p>
+    <ul><li>Example: a 200 cover City site, first 14 weeks after a 6 November opening. All data is invented.</li></ul>
+  </div>
+
+  <div class="panel wk">
+    <div class="wk-chart">
+      <strong class="cap">Average covers per day, by week</strong>
+      <svg class="chart" id="weekChart" viewBox="0 0 620 290" role="group" aria-label="Weekly covers, select a week"></svg>
+      <div class="legend">
+        <span><i style="background:var(--basilico)"></i>Covers per day</span>
+        <span><i style="background:var(--oro)"></i>Selected week</span>
+        <span><i style="background:var(--pomodoro)"></i>Target</span>
+      </div>
+    </div>
+    <div class="wk-detail" aria-live="polite">
+      <h3 id="wkTitle"></h3>
+      <div class="kpis" id="wkKpis"></div>
+      <div class="scroll"><table class="days" id="wkDays"></table></div>
+    </div>
+  </div>
+
+  <div class="tops">
+    <div class="top">
+      <h3>Most profitable</h3>
+      <ol class="rank" id="topProfit"></ol>
+      <strong class="cap">Average profit by day</strong>
+      <div id="dayProfit"></div>
+    </div>
+    <div class="top">
+      <h3>Highest average spend</h3>
+      <ol class="rank" id="topSpend"></ol>
+      <strong class="cap">Average spend by day</strong>
+      <div id="daySpend"></div>
+    </div>
+    <div class="top">
+      <h3>Private rooms booked</h3>
+      <ol class="rank" id="topRooms"></ol>
+      <strong class="cap">Reason for booking, 14 weeks</strong>
+      <div id="roomReasons"></div>
+    </div>
+  </div>
+ </div>
+
+  <section class="block" id="who" aria-labelledby="h-who">
+    <div class="who notes" style="display:block">
+      <h3 id="h-who">Who made this</h3>
+      <p style="max-width:680px">Gabriel Chauvin, final year Master in Management at ESSCA (finance). Six months in Milan at Crédit Agricole CIB on hotel and real estate financing, where business cases like this one were the daily bread. Founder of Mano, an AI career platform I built from scratch. French, Italian and English. Looking to join the Big Mamma UK team from January 2027 on a VIE.</p>
+      <div class="btns">
+        <a class="btn" href="mailto:gabriel.chauvin@essca.eu">gabriel.chauvin@essca.eu</a>
+        <a class="btn" href="tel:+33781240377">+33 7 81 24 03 77</a>
+        <a class="btn" href="https://linkedin.com/in/gabriel-chauvin" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">Independent project, not affiliated with or endorsed by Big Mamma Group. All figures other than those cited above are illustrative assumptions.</div></footer>
+
+<script>
+const FIELDS = [
+  {course:"Antipasti: the site", items:[
+    {id:"seats", label:"Seats", min:60, max:350, step:10, fmt:v=>v, hint:""},
+    {id:"rent", label:"Rent and business rates", min:100, max:1500, step:25, fmt:v=>"£"+v+"k / yr", hint:""},
+    {id:"capex", label:"Fit out and kitchen", min:0.8, max:8, step:0.1, fmt:v=>"£"+v.toFixed(1)+"m", hint:""},
+    {id:"preopen", label:"Pre opening costs", min:100, max:1000, step:25, fmt:v=>"£"+v+"k", hint:""}
+  ]},
+  {course:"Primi: the service", items:[
+    {id:"covers", label:"Covers per day at cruise speed", min:100, max:1200, step:10, fmt:v=>v, hint:""},
+    {id:"spend", label:"Average spend per cover, ex VAT", min:20, max:75, step:0.5, fmt:v=>"£"+v.toFixed(2), hint:""},
+    {id:"days", label:"Days open per year", min:300, max:365, step:1, fmt:v=>v, hint:""}
+  ]},
+  {course:"Secondi: costs (% of sales)", items:[
+    {id:"cogs", label:"Food and drink cost", min:18, max:35, step:0.5, fmt:v=>v.toFixed(1)+"%", hint:""},
+    {id:"labour", label:"Team cost", min:22, max:42, step:0.5, fmt:v=>v.toFixed(1)+"%", hint:""},
+    {id:"other", label:"Everything else", min:6, max:20, step:0.5, fmt:v=>v.toFixed(1)+"%", hint:""}
+  ]},
+  {course:"Dolci: the ramp up", items:[
+    {id:"start", label:"Month one, as % of cruise sales", min:40, max:100, step:5, fmt:v=>v+"%", hint:""},
+    {id:"ramp", label:"Months to cruise speed", min:1, max:18, step:1, fmt:v=>v, hint:""}
+  ]}
+];
+
+const PRESETS = {
+  flagship:{name:"City flagship, 200 covers", seats:200, rent:750, capex:4.5, preopen:500, covers:520, spend:55, days:355, cogs:25, labour:32, other:12, start:75, ramp:6},
+  regional:{name:"Regional city trattoria", seats:170, rent:330, capex:3.0, preopen:350, covers:430, spend:38, days:362, cogs:25, labour:31, other:12, start:80, ramp:5},
+  neighbourhood:{name:"London neighbourhood spot", seats:120, rent:420, capex:2.6, preopen:280, covers:330, spend:40, days:362, cogs:25, labour:32, other:12, start:70, ramp:6}
+};
+
+let state = {...PRESETS.flagship};
+const menu = document.getElementById("menu");
+
+FIELDS.forEach(c=>{
+  const fs = document.createElement("fieldset"); fs.className="course";
+  fs.innerHTML = `<legend>${c.course}</legend>`;
+  c.items.forEach(f=>{
+    const d = document.createElement("div"); d.className="field";
+    d.innerHTML = `<label for="${f.id}">${f.label}</label><output id="o_${f.id}" for="${f.id}"></output>
+      <input type="range" id="${f.id}" min="${f.min}" max="${f.max}" step="${f.step}">
+      ${f.hint?`<small>${f.hint}</small>`:""}`;
+    fs.appendChild(d);
+  });
+  menu.appendChild(fs);
+});
+const ALL = FIELDS.flatMap(c=>c.items);
+
+function syncInputs(){
+  ALL.forEach(f=>{
+    const el=document.getElementById(f.id); el.value=state[f.id];
+    document.getElementById("o_"+f.id).textContent=f.fmt(+state[f.id]);
+  });
+}
+ALL.forEach(f=>{
+  document.getElementById(f.id).addEventListener("input",e=>{
+    state[f.id]=+e.target.value;
+    document.getElementById("o_"+f.id).textContent=f.fmt(state[f.id]);
+    state.name="Your own site";
+    document.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed","false"));
+    render();
+  });
+});
+document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+  state={...PRESETS[b.dataset.preset]};
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false"));
+  syncInputs(); render();
+}));
+
+const money = v=>{
+  const s=v<0?"-":""; v=Math.abs(v);
+  if(v>=1e6) return s+"£"+(v/1e6).toFixed(2)+"m";
+  if(v>=1e3) return s+"£"+Math.round(v/1e3)+"k";
+  return s+"£"+Math.round(v);
+};
+
+function model(p, horizon=120){
+  const matRev = p.covers*p.spend*p.days;
+  const c=p.cogs/100, l=p.labour/100, o=p.other/100;
+  const rent = p.rent*1000;
+  const ebitda = matRev*(1-c-l-o) - rent;
+  const contrib = p.spend*p.days*(1-c-l-o);
+  const be = contrib>0 ? rent/contrib : null;
+  const inv = p.capex*1e6 + p.preopen*1000;
+  let cum=-inv, low=cum, pay=null; const series=[cum];
+  for(let m=1;m<=horizon;m++){
+    const f = m>=p.ramp ? 1 : (p.start/100) + (1-p.start/100)*((m-1)/Math.max(1,p.ramp-1));
+    const rev = matRev/12*f;
+    const lab = Math.max(rev*l, matRev/12*l*0.85);
+    const e = rev - rev*c - rev*o - lab - rent/12;
+    cum += e; series.push(cum); low=Math.min(low,cum);
+    if(pay===null && cum>=0) pay=m;
+  }
+  return {matRev, ebitda, margin: ebitda/matRev, be, inv, low, pay, series,
+    cogs:matRev*c, lab:matRev*l, rent, other:matRev*o};
+}
+
+function payTxt(pay){ return pay===null ? "10 yrs +" : pay+" months"; }
+
+function render(){
+  const r = model(state);
+  document.getElementById("rName").textContent = state.name;
+  document.getElementById("rCovers").textContent = Math.round(state.covers*state.days).toLocaleString("en-GB");
+  document.getElementById("rSales").textContent = money(r.matRev);
+  document.getElementById("rCogs").textContent = money(-r.cogs);
+  document.getElementById("rLab").textContent = money(-r.lab);
+  document.getElementById("rRent").textContent = money(-r.rent);
+  document.getElementById("rOther").textContent = money(-r.other);
+  document.getElementById("rEbitda").textContent = money(r.ebitda);
+  document.getElementById("rMargin").textContent = (r.margin*100).toFixed(1)+"%";
+  document.getElementById("rBe").textContent = r.be ? Math.ceil(r.be) : "never";
+  document.getElementById("rInv").textContent = money(r.inv);
+  document.getElementById("rLow").textContent = money(r.low);
+  document.getElementById("rPay").textContent = payTxt(r.pay);
+
+  const v = document.getElementById("rVerdict");
+  if(r.pay!==null && r.pay<=30){v.innerHTML='Andiamo!<small>This site pays itself back fast.</small>'; v.style.color="#2E6B45";}
+  else if(r.pay!==null && r.pay<=48){v.innerHTML='Si pu&ograve; fare<small>Solid, but watch the lease terms.</small>'; v.style.color="#B97A0B";}
+  else {v.innerHTML='Ci pensiamo...<small>Renegotiate the rent or rethink the room.</small>'; v.style.color="#C0291A";}
+
+  const w = document.getElementById("rWarn");
+  const turns = state.covers/state.seats;
+  if(turns>4){w.style.display="block"; w.textContent=`That is ${turns.toFixed(1)} covers per seat per day. Busy, even for a Big Mamma room.`;}
+  else w.style.display="none";
+
+  const rc=document.getElementById("receipt"); rc.classList.remove("bump"); void rc.offsetWidth; rc.classList.add("bump");
+  setTimeout(()=>rc.classList.remove("bump"),250);
+
+  drawCash(r); drawSens();
+}
+
+function drawCash(r){
+  const svg=document.getElementById("cashChart");
+  const W=900,H=320,pl=64,pr=20,pt=20,pb=36, N=60;
+  const s=r.series.slice(0,N+1);
+  const max=Math.max(...s,0), min=Math.min(...s,0);
+  const x=i=>pl+(W-pl-pr)*i/N, y=v=>pt+(H-pt-pb)*(max-v)/((max-min)||1);
+  let g="";
+  const ticks=5;
+  for(let i=0;i<=ticks;i++){
+    const v=min+(max-min)*i/ticks;
+    g+=`<text x="${pl-8}" y="${y(v)+4}" text-anchor="end">${money(v)}</text>`;
+  }
+  for(let m=0;m<=N;m+=12){ g+=`<text x="${x(m)}" y="${H-12}" text-anchor="middle">${m===0?"Keys":"Year "+(m/12)}</text>`; }
+  g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(0)}" y2="${y(0)}" stroke="var(--soft)" stroke-dasharray="5 5"/>`;
+  const d=s.map((v,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)).join(" ");
+  const area=d+` L${x(N)} ${y(0)} L${x(0)} ${y(0)} Z`;
+  g+=`<path d="${area}" fill="var(--rosa)" opacity=".45"/>`;
+  g+=`<path d="${d}" fill="none" stroke="var(--pomodoro)" stroke-width="3.5" stroke-linejoin="round"/>`;
+  if(r.pay!==null && r.pay<=N){
+    g+=`<circle cx="${x(r.pay)}" cy="${y(s[r.pay])}" r="8" fill="var(--basilico)" stroke="var(--card)" stroke-width="3"/>`;
+    const anchor = r.pay>N*0.8 ? "end":"start", dx = r.pay>N*0.8 ? -12:12;
+    g+=`<text x="${x(r.pay)+dx}" y="${y(s[r.pay])-14}" text-anchor="${anchor}" style="font-weight:800;fill:var(--basilico);font-size:15px">Paid back, month ${r.pay}</text>`;
+  } else {
+    g+=`<text x="${W-pr}" y="${pt+14}" text-anchor="end" style="font-weight:800;fill:var(--bad);font-size:15px">Not paid back within 5 years</text>`;
+  }
+  svg.innerHTML=g;
+}
+
+function drawSens(){
+  const spends=[-10,-5,0,5,10], labs=[0,1,2,4];
+  let h=`<thead><tr><th scope="col">Avg spend</th>${labs.map(l=>`<th scope="col">Team cost ${l?"+"+l+" pts":"as set"}</th>`).join("")}</tr></thead><tbody>`;
+  spends.forEach(sp=>{
+    h+=`<tr><th scope="row">${sp>0?"+":""}${sp}% (£${(state.spend*(1+sp/100)).toFixed(2)})</th>`;
+    labs.forEach(lb=>{
+      const r=model({...state, spend:state.spend*(1+sp/100), labour:state.labour+lb});
+      const cls = r.pay===null||r.pay>48 ? "b" : r.pay>30 ? "m" : "g";
+      h+=`<td class="${cls}${sp===0&&lb===0?" base":""}">${r.pay===null?"10y +":r.pay+" mo"}</td>`;
+    });
+    h+=`</tr>`;
+  });
+  document.getElementById("sens").innerHTML=h+"</tbody>";
+}
+
+/* ---------- Tool 2: invented data for a City site ---------- */
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+const R=rng(11);
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const BASE_COVERS=[430,520,565,600,590,330,255];
+const BASE_SPEND=[51.5,54.5,56.5,59.5,61,53,49.5];
+const REASONS=[["Corporate",.46],["Birthday",.21],["Family celebration",.13],["Engagement or anniversary",.09],["Leaving do",.07],["Other",.04]];
+const RENT_DAY=750000/364, SLOTS=42;
+const start=new Date(2026,10,9);
+const fmtD=d=>d.getDate()+" "+d.toLocaleString("en-GB",{month:"short"});
+const WEEKS=[]; const reasonTotals=Object.fromEntries(REASONS.map(r=>[r[0],0]));
+for(let w=0;w<14;w++){
+  const g=0.85+0.15*Math.min(1,w/8);
+  const season=[1,1,1,1,1.04,1.1,0.82,0.7,0.92,0.97,1,1,1,1][w];
+  const target=[430,445,455,465,480,500,420,360,480,495,500,505,505,505][w];
+  const d0=new Date(start); d0.setDate(start.getDate()+w*7);
+  const d1=new Date(d0); d1.setDate(d0.getDate()+6);
+  const days=DAYS.map((name,k)=>{
+    const date=new Date(d0); date.setDate(d0.getDate()+k);
+    const closed = date.getMonth()===11 && date.getDate()===25;
+    if(closed) return {name,date,closed:true,covers:0,spend:0,rev:0,labour:0,profit:-RENT_DAY};
+    let f=season;
+    if(date.getMonth()===11&&date.getDate()===26) f*=0.35;
+    if(date.getMonth()===0&&date.getDate()===1) f*=0.3;
+    const covers=Math.min(780,Math.round(BASE_COVERS[k]*g*f*(0.94+0.12*R())));
+    const spend=+(BASE_SPEND[k]+1.2*Math.min(1,w/10)+(w===4||w===5?3.2:0)+(R()-.5)*2.4).toFixed(2);
+    const rev=covers*spend;
+    const labour=BASE_COVERS[k]*BASE_SPEND[k]*0.315*(1.2-0.2*Math.min(1,w/9));
+    const profit=rev*(1-.25-.12)-labour-RENT_DAY;
+    return {name,date,covers,spend,rev,labour,profit};
+  });
+  const open=days.filter(d=>!d.closed);
+  const covers=open.reduce((a,d)=>a+d.covers,0), rev=open.reduce((a,d)=>a+d.rev,0), lab=open.reduce((a,d)=>a+d.labour,0);
+  const occ=Math.min(.95,(0.3+0.34*Math.min(1,w/9))*(w===4||w===5?1.4:w===6?0.8:w===7?0.35:1)*(0.93+0.14*R()));
+  const booked=Math.round(SLOTS*occ);
+  const reasons=Object.fromEntries(REASONS.map(r=>[r[0],0]));
+  for(let b=0;b<booked;b++){
+    let x=R(), wts=REASONS.map(r=>[r[0], r[0]==="Corporate"&&(w===4||w===5)?r[1]*1.6:r[1]]);
+    const tot=wts.reduce((a,r)=>a+r[1],0); x*=tot;
+    for(const [n,v] of wts){ if((x-=v)<=0){reasons[n]++;reasonTotals[n]++;break;} }
+  }
+  WEEKS.push({n:w+1,label:`${fmtD(d0)} to ${fmtD(d1)}`,days,target,
+    coversDay:covers/open.length, spend:rev/covers, team:lab/rev,
+    profit:days.reduce((a,d)=>a+d.profit,0), booked, occ:booked/SLOTS, reasons});
+}
+const gbp=(v,dp=0)=>(v<0?"-":"")+"£"+Math.abs(v).toLocaleString("en-GB",{minimumFractionDigits:dp,maximumFractionDigits:dp});
+const gbpk=v=>(v<0?"-":"")+"£"+(Math.abs(v)/1000).toFixed(1)+"k";
+let selWeek=13;
+
+function drawWeeks(){
+  const svg=document.getElementById("weekChart");
+  const W=620,H=290,pl=40,pr=8,pt=12,pb=32,max=600,min=250,n=WEEKS.length,bw=(W-pl-pr)/n;
+  const y=v=>pt+(H-pt-pb)*(max-Math.max(min,v))/(max-min);
+  let g="";
+  [300,400,500,600].forEach(v=>{g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pl-6}" y="${y(v)+4}" text-anchor="end">${v}</text>`;});
+  WEEKS.forEach((wk,i)=>{
+    const xx=pl+i*bw+bw*.15;
+    g+=`<g class="bar" role="button" tabindex="0" data-i="${i}" aria-pressed="${i===selWeek}" aria-label="Week ${wk.n}, ${Math.round(wk.coversDay)} covers per day">
+      <rect x="${xx}" y="${y(wk.coversDay)}" width="${bw*.7}" height="${y(min)-y(wk.coversDay)}" rx="5"/>
+      <rect x="${pl+i*bw}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent" style="fill:transparent"/></g>
+      <text x="${xx+bw*.35}" y="${H-10}" text-anchor="middle" style="${i===selWeek?'font-weight:800;fill:var(--ink)':''}">W${wk.n}</text>`;
+  });
+  const d=WEEKS.map((wk,i)=>(i?"L":"M")+(pl+i*bw+bw/2).toFixed(1)+" "+y(wk.target).toFixed(1)).join(" ");
+  g+=`<path d="${d}" fill="none" stroke="var(--pomodoro)" stroke-width="3" stroke-dasharray="7 5" pointer-events="none"/>`;
+  svg.innerHTML=g;
+  svg.querySelectorAll(".bar").forEach(b=>{
+    const go=()=>{selWeek=+b.dataset.i;drawWeeks();showWeek();svg.querySelector(`.bar[data-i="${selWeek}"]`).focus();};
+    b.addEventListener("click",go);
+    b.addEventListener("keydown",e=>{
+      if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}
+      if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();selWeek=(selWeek+(e.key==="ArrowRight"?1:n-1))%n;drawWeeks();showWeek();svg.querySelector(`.bar[data-i="${selWeek}"]`).focus();}
+    });
+  });
+}
+
+function showWeek(){
+  const wk=WEEKS[selWeek];
+  document.getElementById("wkTitle").textContent=`Week ${wk.n}, ${wk.label}`;
+  const vs=wk.coversDay/wk.target;
+  const col=v=>v>=.97?"var(--good)":v>=.85?"var(--mid)":"var(--bad)";
+  document.getElementById("wkKpis").innerHTML=`
+    <div class="kpi"><span>Covers per day</span><b>${Math.round(wk.coversDay)}</b><em style="color:${col(vs)}">${Math.round(vs*100)}% of target</em></div>
+    <div class="kpi"><span>Avg spend ex VAT</span><b>${gbp(wk.spend,2)}</b><em style="color:var(--soft)">per cover</em></div>
+    <div class="kpi"><span>Team cost / sales</span><b>${(wk.team*100).toFixed(1)}%</b><em style="color:${col(0.32/wk.team)}">cruise level 31.5%</em></div>
+    <div class="kpi"><span>Site profit</span><b>${gbpk(wk.profit)}</b><em style="color:var(--soft)">private rooms ${wk.booked}/${SLOTS}</em></div>`;
+  const bestP=Math.max(...wk.days.map(d=>d.profit));
+  document.getElementById("wkDays").innerHTML=`<thead><tr><th>Day</th><th>Covers</th><th>Avg spend</th><th>Sales</th><th>Profit</th></tr></thead><tbody>`+
+    wk.days.map(d=>d.closed
+      ?`<tr class="closed"><td>${d.name} ${d.date.getDate()}</td><td colspan="4" style="text-align:right">Closed</td></tr>`
+      :`<tr class="${d.profit===bestP?"best":""}"><td>${d.name} ${d.date.getDate()}</td><td>${d.covers}</td><td>${gbp(d.spend,2)}</td><td>${gbpk(d.rev)}</td><td>${gbpk(d.profit)}</td></tr>`).join("")+`</tbody>`;
+}
+
+function hbars(el,rows,fmt,wide){
+  const max=Math.max(...rows.map(r=>r[1]));
+  const top=rows.reduce((a,r)=>r[1]>a[1]?r:a);
+  document.getElementById(el).innerHTML=rows.map(r=>`<div class="hb${wide?" wide":""}${r===top?" top1":""}"><span>${r[0]}</span><div class="track"><div class="fill" style="width:${Math.max(3,r[1]/max*100)}%"></div></div><b>${fmt(r[1])}</b></div>`).join("");
+}
+function rank(el,rows){
+  document.getElementById(el).innerHTML=rows.map((r,i)=>`<li><span class="pos">${i+1}</span><span class="lbl">${r[0]}</span><span class="val">${r[1]}</span></li>`).join("");
+}
+function drawTops(){
+  const byP=[...WEEKS].sort((a,b)=>b.profit-a.profit).slice(0,3);
+  rank("topProfit",byP.map(w=>[`Week ${w.n}, ${w.label}`,gbpk(w.profit)]));
+  const byS=[...WEEKS].sort((a,b)=>b.spend-a.spend).slice(0,3);
+  rank("topSpend",byS.map(w=>[`Week ${w.n}, ${w.label}`,gbp(w.spend,2)]));
+  const byR=[...WEEKS].sort((a,b)=>b.occ-a.occ).slice(0,3);
+  rank("topRooms",byR.map(w=>[`Week ${w.n}, ${w.label}`,Math.round(w.occ*100)+"%"]));
+  const avg=(k,f)=>{const ds=WEEKS.flatMap(w=>w.days.filter(d=>!d.closed&&d.name===k));return ds.reduce((a,d)=>a+f(d),0)/ds.length;};
+  hbars("dayProfit",DAYS.map(k=>[k,avg(k,d=>d.profit)]),gbpk);
+  hbars("daySpend",DAYS.map(k=>[k,avg(k,d=>d.spend)]),v=>gbp(v,2));
+  const tot=Object.values(reasonTotals).reduce((a,b)=>a+b,0);
+  hbars("roomReasons",REASONS.map(r=>[r[0],reasonTotals[r[0]]/tot*100]),v=>Math.round(v)+"%",true);
+}
+
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function openTab(t){tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);x.tabIndex=on?0:-1;document.getElementById(x.getAttribute('aria-controls')).hidden=!on;});}
+tabs.forEach((t,i)=>{t.addEventListener('click',()=>openTab(t));t.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];openTab(n);n.focus();}});});
+syncInputs(); render(); drawWeeks(); showWeek(); drawTops();
+</script>
+</body>
+</html>
