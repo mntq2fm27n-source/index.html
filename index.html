@@ -200,14 +200,6 @@ footer{padding:26px 0 40px;font-size:14px;color:var(--soft)}
 <main class="wrap">
  <div role="tabpanel" id="p1" aria-labelledby="t1">
   <h2 class="part-title">Is this new site worth opening?</h2>
-  <div class="readme">
-    <p>A quick business case for a new site: move the sliders, read the bill. It is a 5 minute demo to show the kind of tools I can build, not a real analysis. Almost every number is made up, except these few found online:</p>
-    <ul>
-      <li>UK sales of £56.2m in 2025, up 27%, gross margin 75% (Companies House, via Restaurant Online)</li>
-      <li>Average spend of roughly £27 to £60 across the estate (Victor Lugger, MCA conference, 2023)</li>
-      <li>Edmondo: 200 covers and three private dining rooms near Bank, opening 6 November 2026</li>
-    </ul>
-  </div>
 
   <div class="presets" role="group" aria-label="Start from a profile">
     <span>Start from:</span>
@@ -244,21 +236,23 @@ footer{padding:26px 0 40px;font-size:14px;color:var(--soft)}
     </aside>
   </div>
 
-  <section class="block" aria-labelledby="h-cash">
-    <h2 id="h-cash">Where the cash goes</h2>
-    <div class="panel">
-      <svg class="chart" id="cashChart" viewBox="0 0 900 320" role="img" aria-label="Cumulative cash over 60 months"></svg>
-      <div class="legend">
-        <span><i style="background:var(--pomodoro)"></i>Cumulative cash</span>
-        <span><i style="background:var(--soft)"></i>Break even line</span>
-      </div>
-    </div>
-  </section>
-
   <section class="block" aria-labelledby="h-sens">
     <h2 id="h-sens">E se...? Payback in months</h2>
     <div class="panel scroll"><table class="sens" id="sens"></table></div>
   </section>
+
+  <section class="block" aria-labelledby="h-assump">
+    <h2 id="h-assump">Assumptions</h2>
+    <div class="readme" style="margin:0">
+    <p>A quick business case for a new site: move the sliders, read the bill. It is a 5 minute demo to show the kind of tools I can build, not a real analysis. Almost every number is made up, except these few found online:</p>
+    <ul>
+      <li>UK sales of £56.2m in 2025, up 27%, gross margin 75% (Companies House, via Restaurant Online)</li>
+      <li>Average spend of roughly £27 to £60 across the estate (Victor Lugger, MCA conference, 2023)</li>
+      <li>Edmondo: 200 covers and three private dining rooms near Bank, opening 6 November 2026</li>
+    </ul>
+      </div>
+  </section>
+
 
  </div>
 
@@ -450,35 +444,7 @@ function render(){
   const rc=document.getElementById("receipt"); rc.classList.remove("bump"); void rc.offsetWidth; rc.classList.add("bump");
   setTimeout(()=>rc.classList.remove("bump"),250);
 
-  drawCash(r); drawSens();
-}
-
-function drawCash(r){
-  const svg=document.getElementById("cashChart");
-  const W=900,H=320,pl=64,pr=20,pt=20,pb=36, N=60;
-  const s=r.series.slice(0,N+1);
-  const max=Math.max(...s,0), min=Math.min(...s,0);
-  const x=i=>pl+(W-pl-pr)*i/N, y=v=>pt+(H-pt-pb)*(max-v)/((max-min)||1);
-  let g="";
-  const ticks=5;
-  for(let i=0;i<=ticks;i++){
-    const v=min+(max-min)*i/ticks;
-    g+=`<text x="${pl-8}" y="${y(v)+4}" text-anchor="end">${money(v)}</text>`;
-  }
-  for(let m=0;m<=N;m+=12){ g+=`<text x="${x(m)}" y="${H-12}" text-anchor="middle">${m===0?"Keys":"Year "+(m/12)}</text>`; }
-  g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(0)}" y2="${y(0)}" stroke="var(--soft)" stroke-dasharray="5 5"/>`;
-  const d=s.map((v,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)).join(" ");
-  const area=d+` L${x(N)} ${y(0)} L${x(0)} ${y(0)} Z`;
-  g+=`<path d="${area}" fill="var(--rosa)" opacity=".45"/>`;
-  g+=`<path d="${d}" fill="none" stroke="var(--pomodoro)" stroke-width="3.5" stroke-linejoin="round"/>`;
-  if(r.pay!==null && r.pay<=N){
-    g+=`<circle cx="${x(r.pay)}" cy="${y(s[r.pay])}" r="8" fill="var(--basilico)" stroke="var(--card)" stroke-width="3"/>`;
-    const anchor = r.pay>N*0.8 ? "end":"start", dx = r.pay>N*0.8 ? -12:12;
-    g+=`<text x="${x(r.pay)+dx}" y="${y(s[r.pay])-14}" text-anchor="${anchor}" style="font-weight:800;fill:var(--basilico);font-size:15px">Paid back, month ${r.pay}</text>`;
-  } else {
-    g+=`<text x="${W-pr}" y="${pt+14}" text-anchor="end" style="font-weight:800;fill:var(--bad);font-size:15px">Not paid back within 5 years</text>`;
-  }
-  svg.innerHTML=g;
+  drawSens();
 }
 
 function drawSens(){
@@ -508,9 +474,9 @@ const start=new Date(2026,10,9);
 const fmtD=d=>d.getDate()+" "+d.toLocaleString("en-GB",{month:"short"});
 const WEEKS=[]; const reasonTotals=Object.fromEntries(REASONS.map(r=>[r[0],0]));
 for(let w=0;w<14;w++){
-  const g=0.85+0.15*Math.min(1,w/8);
+  const g=0.87+0.30*Math.min(1,w/10);
   const season=[1,1,1,1,1.04,1.1,0.82,0.7,0.92,0.97,1,1,1,1][w];
-  const target=[430,445,455,465,480,500,420,360,480,495,500,505,505,505][w];
+  const target=[430,445,455,465,480,500,400,310,470,490,500,505,505,505][w];
   const d0=new Date(start); d0.setDate(start.getDate()+w*7);
   const d1=new Date(d0); d1.setDate(d0.getDate()+6);
   const days=DAYS.map((name,k)=>{
